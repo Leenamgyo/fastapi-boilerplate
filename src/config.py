@@ -27,7 +27,7 @@ class PostgresDBSettings(BaseSettings):
     POSTGRES_ASYNC_PREFIX: str = config("POSTGRES_ASYNC_PREFIX", default="postgresql+asyncpg://")
     POSTGRES_URI: str = f"{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_SERVER}:{POSTGRES_PORT}/{POSTGRES_DB}"
     POSTGRES_URL: str | None = config("POSTGRES_URL", default=None)
-    
+
 class MongoDBSettings(BaseSettings):
     MONGO_URL: str = config("MONGO_URL", default=None)
     MONGO_USER_NAME: str = config("MONGO_USER_NAME", default=None)
@@ -36,7 +36,8 @@ class MongoDBSettings(BaseSettings):
     
 class Settings(
     AppSettings,
-    PostgresDBSettings
+    PostgresDBSettings,
+    MongoDBSettings
 ):
     pass
 
