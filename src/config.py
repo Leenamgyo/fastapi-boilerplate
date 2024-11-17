@@ -33,6 +33,12 @@ class MongoDBSettings(BaseSettings):
     MONGO_USER_NAME: str = config("MONGO_USER_NAME", default=None)
     MONGO_USER_PASSWORD: str = config("MONGO_USER_PASSWORD", default=None)
     MONGO_DB_NAME: str = config("MONGO_DB_NAME", default=None)
+
+    def get_mongo_url(self) -> str:
+        """
+        MongoDB connection string을 생성합니다.
+        """
+        return f"mongodb://{self.MONGO_USER_NAME}:{self.MONGO_USER_PASSWORD}@{self.MONGO_URL}/"
     
 class Settings(
     AppSettings,

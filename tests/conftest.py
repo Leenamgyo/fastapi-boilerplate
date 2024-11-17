@@ -15,15 +15,14 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../s
 
 @pytest.fixture(autouse=True)
 def set_env_vars(monkeypatch):
-    monkeypatch.setenv('MONGO_URL', 'mongodb://localhost:27017')
+    monkeypatch.setenv('MONGO_URL', 'localhost:27017')
     monkeypatch.setenv('MONGO_USER_NAME', 'root')
-    monkeypatch.setenv('MONGO_USER_PASSWORD', 'rootpassword1133')
-    monkeypatch.setenv('MONGO_DB_NAME', 'mydb')
+    monkeypatch.setenv('MONGO_USER_PASSWORD', 'rootpassword')
+    monkeypatch.setenv('MONGO_DB_NAME', 'test-db')
 
 @pytest.fixture
 def settings():
     config = Config()
-
     return Settings(
         MONGO_URL=config("MONGO_URL", default=None),
         MONGO_USER_NAME=config("MONGO_USER_NAME", default=None),
@@ -32,23 +31,23 @@ def settings():
     )
 
 
-@pytest_asyncio.fixture()
+@pytest_asyncio.fixture(scope="session")
 async def mongo_client(settings):    
-    MONGO_URL = settings.MONGO_URL
-    MONGO_DB_NAME = settings.MONGO_DB_NAME
-    MONGO_USER_NAME = settings.MONGO_USER_NAME
-    MONGO_PASSWORD = settings.MONGO_USER_PASSWORD
-
     mongo_client: AsyncIOMotorClient = AsyncIOMotorClient(
-        MONGO_URL, 
-        username=MONGO_USER_NAME,
-        password=MONGO_PASSWORD,
-        uuidRepresentation="standard",
+        settings.get_mongo_url(), 
+        uuidRepresentation="standard"
     )
-    
-    return mongo_client[MONGO_DB_NAME]
-     
+    return mongo_client
 
-# @pytest.fixture    
-# def mongo_client(settings):
+
+
+@pytest_asyncio.fixture(scope="session")
+async def mongo_db(mongo_client):
+    db = mongo_client["test_db"]
     
+    # setup 단계
+    yield db
+
+    # teardown 단계
+    mongo_client.drop_database("test_db")
+    mongo_client.close()
